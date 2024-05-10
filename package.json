@@ -1,0 +1,46 @@
+{
+    "name": "sembuilder_algo",
+    "version": "1.2.0",
+    "description": "Combinatronics and filtering algorithm for generating functional schedules ",
+    "main": "index.ts",
+    "scripts": {
+        "start": "npm run serve",
+        "build": "npm run build-ts",
+        "serve": "node dist/main/index.js",
+        "test": "jest --coverage=false --verbose",
+        "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+        "watch-node": "nodemon dist/main/index.js",
+        "build-ts": "tsc",
+        "watch-ts": "tsc -w",
+        "lint": "eslint src/*.ts",
+        "lint-fix": "yarn lint --fix",
+        "debug": "npm run build && npm run watch-debug",
+        "serve-debug": "nodemon --inspect dist/server.js",
+        "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
+        "typecheck": "tsc --noEmit",
+        "run-prettier": "prettier src/*.ts",
+        "validate-prettiness": "yarn run-prettier -c",
+        "make-prettier": "yarn run-prettier --write"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "@types/jest": "26.0.24",
+        "@types/node": "14.18.63",
+        "@types/supertest": "2.0.16",
+        "@typescript-eslint/eslint-plugin": "4.33.0",
+        "@typescript-eslint/parser": "4.33.0",
+        "concurrently": "6.5.1",
+        "eslint": "7.32.0",
+        "eslint-config-prettier": "8.10.0",
+        "eslint-plugin-import": "2.29.1",
+        "jest": "26.6.3",
+        "nodemon": "2.0.22",
+        "prettier": "2.8.8",
+        "supertest": "6.3.3",
+        "ts-jest": "26.5.6",
+        "typescript": "4.9.5"
+    }
+}
