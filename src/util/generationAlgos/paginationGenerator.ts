@@ -214,29 +214,31 @@ export function sortSectionsForCourses(data: CompiledCoursesData): {
     const sortedResult: { [key: string]: string[] } = {};
     Object.keys(data).forEach(courseTitle => {
         const sortedSectionsArray = Object.keys(data[courseTitle]).sort(
-            (a, b) => {
-                const isANumeric = /^\d+$/.test(a);
-                const isBNumeric = /^\d+$/.test(b);
-
-                // If both are purely numerical, compare them as numbers
-                if (isANumeric && isBNumeric) {
-                    return parseInt(a) - parseInt(b);
-                }
-
-                // If both are hybrid or both are non-numeric, compare them as strings
-                if (!isANumeric && !isBNumeric) {
-                    return a.localeCompare(b);
-                }
-
-                // Numeric strings come before hybrid strings
-                return isANumeric ? -1 : 1;
-            },
+            compareSectionNumber,
         );
 
         sortedResult[courseTitle] = sortedSectionsArray;
     });
 
     return sortedResult;
+}
+
+export function compareSectionNumber(a: string, b: string): number {
+    const isANumeric = /^\d+$/.test(a);
+    const isBNumeric = /^\d+$/.test(b);
+
+    // If both are purely numerical, compare them as numbers
+    if (isANumeric && isBNumeric) {
+        return parseInt(a) - parseInt(b);
+    }
+
+    // If both are hybrid or both are non-numeric, compare them as strings
+    if (!isANumeric && !isBNumeric) {
+        return a.localeCompare(b);
+    }
+
+    // Numeric strings come before hybrid strings
+    return isANumeric ? -1 : 1;
 }
 
 export function areDuplicatesInLPD(LPD: string[]): boolean {
@@ -355,6 +357,6 @@ function isTimeInBetweenInterval(
     return x >= earlierBound && x <= laterBound;
 }
 
-function deepCloneObject<T>(obj: T): DeepClone<T> {
+export function deepCloneObject<T>(obj: T): DeepClone<T> {
     return JSON.parse(JSON.stringify(obj));
 }
