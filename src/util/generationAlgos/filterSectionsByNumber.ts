@@ -31,7 +31,6 @@
  */
 
 import { CompiledCoursesData, SectionData } from "../../types/api.types";
-import { deepCloneObject } from "./paginationGenerator";
 
 export interface Filters {
     [courseTitle: string]: string[]; // Array of section numbers
@@ -57,7 +56,7 @@ export function filterSectionsByNumber(
     const actionType = action ? action : "POSITIVE";
 
     const clonedCourseSectionsMap: CompiledCoursesData =
-        deepCloneObject(courseSectionsMap);
+        courseSectionsMap;
 
     for (const courseTitle in sectionFilters) {
         const sectionsToFilter = sectionFilters[courseTitle];
@@ -80,25 +79,20 @@ export function filterSectionsByNumber(
         //POS = Only those sections should be in dataset
         //NEG = Those specific sections should not be in the dataset
 
-        if (actionType === "POSITIVE") {
-            clonedCourseSectionsMap[courseTitle] = {};
-
-            for (const sectionNumber of sectionsToFilter) {
-                clonedCourseSectionsMap[courseTitle][sectionNumber] =
-                    deepCloneObject(
-                        courseSectionsMap[courseTitle][sectionNumber],
-                    );
+        for (const sectionNumber of sectionsMapKeys) {
+            const sectionExists = sectionsToFilter.includes(sectionNumber);
+            if (
+                (actionType === "POSITIVE" && !sectionExists) ||
+                (actionType === "NEGATIVE" && sectionExists)
+            ) {
+                delete clonedCourseSectionsMap[courseTitle][sectionNumber];
             }
-        } else {
-            deleteSectionsFromMap(
-                sectionsToFilter,
-                clonedCourseSectionsMap[courseTitle],
-            );
         }
     }
 
     return clonedCourseSectionsMap;
 }
+
 function deleteSectionsFromMap(
     sectionsToPrune: string[],
     sectionsMap: Record<string, SectionData>,

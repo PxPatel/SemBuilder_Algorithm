@@ -25,13 +25,14 @@ async function getCoursesData(): Promise<CompiledCoursesData> {
 
 const courseSectionMap = getCoursesData();
 
-describe.skip("Filtering a course-sections map by specific sections ", () => {
+describe("Filtering a course-sections map by specific sections ", () => {
     test("No filters applied", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {};
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
         );
         expect(filteredResponse).toEqual(realMap);
@@ -39,12 +40,13 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("One section positive filter - 1", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
             "POSITIVE",
         );
@@ -68,12 +70,13 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("One section positive filter - 2", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             ENGL102: ["089"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
@@ -96,12 +99,13 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Mutli section positive filter - 1", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004", "002"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
@@ -124,13 +128,14 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Mutli course positive filters - 1", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004", "002"],
             FIN315: ["002"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
@@ -153,6 +158,7 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Mutli course positive filters - 2", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004", "002"],
             FIN315: ["002", "102"],
@@ -161,7 +167,7 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
@@ -184,12 +190,13 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("One section negative filter - 1", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
             "NEGATIVE",
         );
@@ -214,12 +221,13 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("One section negative filter - 2", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             ENGL102: ["089"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
             "NEGATIVE",
         );
@@ -244,12 +252,13 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Mutli section negative filter - 1", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004", "002"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
             "NEGATIVE",
         );
@@ -274,13 +283,14 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Mutli course negative filters - 1", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004", "002"],
             FIN315: ["002"],
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
             "NEGATIVE",
         );
@@ -305,6 +315,7 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Mutli course negative filters - 2", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["004", "002"],
             FIN315: ["002", "102"],
@@ -313,7 +324,7 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
         };
 
         const filteredResponse = filterSectionsByNumber(
-            realMap,
+            fakeMap,
             sectionFilters,
             "NEGATIVE",
         );
@@ -338,6 +349,7 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Invalid course filter", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS280: ["004", "002"],
             FIN315: ["002", "102"],
@@ -352,6 +364,7 @@ describe.skip("Filtering a course-sections map by specific sections ", () => {
 
     test("Invalid section filter", async () => {
         const realMap = await courseSectionMap;
+        const fakeMap = deepCloneObject(realMap);
         const sectionFilters: Filters = {
             CS114: ["FOO", "002"],
             FIN315: ["002", "102"],

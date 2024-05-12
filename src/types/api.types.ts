@@ -23,13 +23,15 @@ export interface SectionData extends Omit<AltSection, "co_sem_id"> {
     course_semester_info: CourseSemester;
 }
 
-export type DAY = "M" | "T" | "W" | "R" | "F" | "S" | "X";
+export type Day = "M" | "T" | "W" | "R" | "F" | "S";
+export type VoidDay = "X";
+export type ValidDay = Day | VoidDay;
 
 interface AltSection {
     co_sem_id: string;
     credits: number;
     crn: number;
-    days: DAY[] | null;
+    days: ValidDay[] | null;
     end_times: number[] | null;
     info: string | null;
     instructor: string | null;

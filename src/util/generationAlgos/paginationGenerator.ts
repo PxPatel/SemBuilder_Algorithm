@@ -38,9 +38,9 @@
 
 import {
     CompiledCoursesData,
-    DAY,
     DeepClone,
     SectionData,
+    ValidDay,
 } from "../../types/api.types";
 import {
     LastPointDetails,
@@ -112,7 +112,8 @@ export function auxPaginationGenerator(
     //Push the currentSchedule to the results
     //After pushing, if the results reach a limit, return true and the LPD
     if (courseTitleArray.length === keyIndex) {
-        generatedSchedules.push(deepCloneObject(currentSchedule));
+        // generatedSchedules.push(deepCloneObject(currentSchedule));
+        generatedSchedules.push(simplySchedule(currentSchedule));
 
         if (generatedSchedules.length === generateNum) {
             return [true, simplySchedule(currentSchedule)];
@@ -138,6 +139,9 @@ export function auxPaginationGenerator(
         i++
     ) {
         const sectionNumber = sectionsOfSelectedCourse[i];
+
+        //Can perhaps consider an inline filtering of sections
+
         if (
             !doesScheduleHaveConflict(
                 courseSectionsMap[selectedCourseTitle][sectionNumber],
@@ -263,11 +267,11 @@ export function sortCoursesByTitle(courseTitleArray: string[]): string[] {
     return courseTitleArray.sort((a, b) => a.localeCompare(b));
 }
 
-function simplySchedule(currentSchedule: Schedule): string[] {
+export function simplySchedule(currentSchedule: Schedule): string[] {
     const set = new Set<string>();
 
     for (const day of Object.keys(currentSchedule)) {
-        const sectionsTakenOnDay = currentSchedule[<DAY>day];
+        const sectionsTakenOnDay = currentSchedule[<ValidDay>day];
         sectionsTakenOnDay.forEach(sectionId => {
             const sectionIdentity = sectionId.split("_")[1];
             if (!set.has(sectionIdentity)) {

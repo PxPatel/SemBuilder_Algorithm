@@ -1,10 +1,10 @@
 import {
     CompiledCoursesData,
-    DAY,
     DeepClone,
     SectionData,
 } from "../../types/api.types";
 import { ReportSchedules, Schedule } from "../../types/schedule.types";
+import { simplySchedule } from "./paginationGenerator";
 
 /**
  * So the larger algorithm needs to output an array of Schedules
@@ -74,7 +74,8 @@ export function auxScheduleGenerator(
     currentSchedule: Schedule,
 ): void {
     if (dataKeys.length === dataKeyIndex) {
-        resultArray.push(deepCloneObject(currentSchedule));
+        // resultArray.push(deepCloneObject(currentSchedule));
+        resultArray.push(simplySchedule(currentSchedule));
         return;
     }
 
