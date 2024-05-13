@@ -1,13 +1,8 @@
-/**
- * Steps:
- * 1. Algorithm will take input from a user, regarding which courses are indented to be taken
- * 2. A callAPI function will call the API for the sections, using the /api/sections endpoint
- */
-
 import { Day } from "../types/api.types";
 import { Schedule } from "../types/schedule.types";
-import { Filters } from "../util/generationAlgos/filterSectionsByNumber";
+import { SelectedSections } from "../util/sectionFilters/filterSectionsByNumber";
 import { generateFilteredSchedules } from "../util/generateFilteredSchedules";
+import { TimeOptions } from "../util/sectionFilters/filterSectionsByTime";
 
 const inputObject = [
     "CS114",
@@ -18,34 +13,46 @@ const inputObject = [
     "FIN315",
 ];
 
+console.log("Triggering :)");
+
 //To control program during tsc -w and nodemon scripts
 const mainflag = true;
 
 const main = async () => {
-    const sectionFilters: Filters = {};
-    const unwantedDay: Day[] = ["M", "W", "F"];
+    const sectionFilters: SelectedSections = {
+        // CS114: ["002", "004"],
+        // ENGL102: ["089"],
+        // IS350: ["102"],
+        // MATH337: ["002"],
+        // YWCC207: ["004"],
+    };
+    const unwantedDay: Day[] = [];
+    const timeFilters: TimeOptions = {
+        before: 50000000,
+        after: 100000000,
+    };
 
-    await generateFilteredSchedules(sectionFilters, unwantedDay);
+    await generateFilteredSchedules(sectionFilters, unwantedDay, timeFilters);
 };
 
-export function filterFunctionalSchedules(
-    scheduleCombinations: Schedule[],
-): Schedule[] {
-    return scheduleCombinations.filter(
-        schedule =>
-            schedule.X.length === 0 &&
-            schedule.M.length === 3 &&
-            schedule.T.length === 2 &&
-            schedule.W.length === 1 &&
-            schedule.R.length === 4 &&
-            schedule.F.length === 0 &&
-            schedule.M.includes("Spring2024_YWCC207-004") &&
-            schedule.M.includes("Spring2024_ENGL102-089") &&
-            schedule.M.includes("Spring2024_CS114-004"),
-        // schedule.W.includes("Spring2024_ENGL102-089"),
-        // schedule.T.includes("Spring2024_MATH337-002") &&
-        // schedule.T.includes("Spring2024_FIN315-004"),
-    );
-}
+// export function filterFunctionalSchedules(
+//     scheduleCombinations: Schedule[],
+// ): Schedule[] {
+//     return scheduleCombinations.filter(
+//         schedule =>
+//             schedule.X.length === 0 &&
+//             schedule.M.length === 3 &&
+//             schedule.T.length === 2 &&
+//             schedule.W.length === 1 &&
+//             schedule.R.length === 4 &&
+//             schedule.F.length === 0 &&
+//             schedule.M.includes("Spring2024_YWCC207-004") &&
+//             schedule.M.includes("Spring2024_ENGL102-089") &&
+//             schedule.M.includes("Spring2024_CS114-004"),
+//         // schedule.W.includes("Spring2024_ENGL102-089"),
+//         // schedule.T.includes("Spring2024_MATH337-002") &&
+//         // schedule.T.includes("Spring2024_FIN315-004"),
+//     );
+// }
 
 mainflag && main();

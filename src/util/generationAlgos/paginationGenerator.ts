@@ -40,13 +40,20 @@ import {
     CompiledCoursesData,
     DeepClone,
     SectionData,
-    ValidDay,
+    DayType,
 } from "../../types/api.types";
 import {
     LastPointDetails,
     ReportSchedules,
     Schedule,
 } from "../../types/schedule.types";
+
+export type GenerationOptions = {
+    lastPointDetails?: LastPointDetails;
+    generateAmount?: number;
+};
+
+const DEFAULT_GENERATION_AMOUNT = 20;
 
 /**
  *
@@ -57,9 +64,33 @@ import {
  */
 export function paginationGenerator(
     courseSectionsMap: CompiledCoursesData,
-    lastPointDetails?: LastPointDetails,
-    generateAmount?: number,
+    generationOptions?: GenerationOptions,
 ): [ReportSchedules, LastPointDetails] {
+    const { lastPointDetails, generateAmount } = generationOptions;
+
+    if (lastPointDetails === null) {
+        return [[], null];
+    }
+
+    if (generateAmount === null) {
+        throw new Error(
+            `Value for 'generateAmount' parameter is not valid: ${generateAmount}`,
+        );
+    }
+
+    const LPD =
+        typeof lastPointDetails === "undefined" || lastPointDetails.length === 0
+            ? []
+            : lastPointDetails;
+
+    if (areDuplicatesInLPD(LPD)) {
+        throw new Error(`Last Point Details has a duplicate course: ${LPD}`);
+    }
+
+    const generateNum = generateAmount
+        ? generateAmount
+        : DEFAULT_GENERATION_AMOUNT;
+
     const generatedSchedules: ReportSchedules = [];
     const currentSchedule: Schedule = {
         M: [],
@@ -70,19 +101,8 @@ export function paginationGenerator(
         S: [],
         X: [],
     };
-    const sortedSectionsMap = sortSectionsForCourses(courseSectionsMap);
-    const LPD =
-        typeof lastPointDetails === "undefined" || lastPointDetails === null
-            ? []
-            : lastPointDetails;
-
-    if (areDuplicatesInLPD(LPD)) {
-        throw new Error(`Last Point Detail has a duplicate course: ${LPD}`);
-    }
-
-    const generateNum = generateAmount ? generateAmount : 20;
-
     const courseTitleArray = sortCoursesByTitle(Object.keys(courseSectionsMap));
+    const sortedSectionsMap = sortSectionsForCourses(courseSectionsMap);
 
     const [, newLDP] = auxPaginationGenerator(
         courseSectionsMap,
@@ -271,7 +291,7 @@ export function simplySchedule(currentSchedule: Schedule): string[] {
     const set = new Set<string>();
 
     for (const day of Object.keys(currentSchedule)) {
-        const sectionsTakenOnDay = currentSchedule[<ValidDay>day];
+        const sectionsTakenOnDay = currentSchedule[<DayType>day];
         sectionsTakenOnDay.forEach(sectionId => {
             const sectionIdentity = sectionId.split("_")[1];
             if (!set.has(sectionIdentity)) {

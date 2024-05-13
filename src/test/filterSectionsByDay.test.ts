@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { CompiledCoursesData, Day } from "../types/api.types";
-import { filterSectionByDays } from "../util/generationAlgos/filterSectionsByDays";
+import { filterSectionByDays } from "../util/sectionFilters/filterSectionsByDays";
 import { deepCloneObject } from "../util/generationAlgos/paginationGenerator";
 
 async function getCoursesData(): Promise<CompiledCoursesData> {
@@ -27,7 +27,7 @@ describe.skip("Filtering a course-section map based on unwanted days", () => {
 
         const filteredResponse = filterSectionByDays(fakeMap, unwantedDays);
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-        
+
         //Add more verifications
     });
 });

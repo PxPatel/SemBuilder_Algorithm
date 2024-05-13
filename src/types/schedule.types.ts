@@ -1,4 +1,4 @@
-import { Day, ValidDay } from "./api.types";
+import { DayType } from "./api.types";
 
 export type CourseName = string;
 
@@ -8,7 +8,7 @@ export type SectionId = string;
 
 export type SectionsInDay = SectionId[];
 
-export type Schedule = Record<ValidDay, SectionsInDay>;
+export type Schedule = Record<DayType, SectionsInDay>;
 
 // export type ReportSchedules = Schedule[];
 export type ReportSchedules = string[][];

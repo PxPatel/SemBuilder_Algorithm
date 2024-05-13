@@ -22,4 +22,5 @@ sectionNumber = 002, 004, 104, 116
 
 sectionIdentity = CS114-002, ENGL102-089, FIN315-006H
 
+sectionId = Spring2024_CS114-002, Fall2023_ENGL102-089
 ---

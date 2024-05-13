@@ -1,15 +1,20 @@
 import { readFileSync, writeFileSync } from "fs";
 import {
-    Filters,
+    SelectedSections,
     filterSectionsByNumber,
-} from "./generationAlgos/filterSectionsByNumber";
+} from "./sectionFilters/filterSectionsByNumber";
 import { Day } from "../types/api.types";
-import { filterSectionByDays } from "./generationAlgos/filterSectionsByDays";
+import { filterSectionByDays } from "./sectionFilters/filterSectionsByDays";
 import { paginationGenerator } from "./generationAlgos/paginationGenerator";
+import {
+    TimeOptions,
+    filterSectionByTime,
+} from "./sectionFilters/filterSectionsByTime";
 
 export async function generateFilteredSchedules(
-    sectionFilters: Filters,
+    sectionFilters: SelectedSections,
     unwantedDays: Day[],
+    timeFilters: TimeOptions,
 ): Promise<void> {
     const READ_FROM_PATH =
         "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data.json";
@@ -25,8 +30,12 @@ export async function generateFilteredSchedules(
 
         filterSectionsByNumber(relevantCoursesData, sectionFilters, "POSITIVE");
         filterSectionByDays(relevantCoursesData, unwantedDays);
+        filterSectionByTime(relevantCoursesData, timeFilters);
 
-        const response = paginationGenerator(relevantCoursesData, [], 100);
+        const response = paginationGenerator(relevantCoursesData, {
+            lastPointDetails: [],
+            generateAmount: 100,
+        });
 
         writeFileSync(WRITE_TO_PATH, JSON.stringify(response));
 

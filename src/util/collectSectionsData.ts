@@ -7,7 +7,7 @@ const SEMESTER = "Spring_2024";
 
 const getSectionsForAllCourses = async (
     courseTitleArray: string[],
-    queryParameters?: Record<string, unknown>,
+    // semesterTitle?: string,
 ) => {
     const promises = [];
 
@@ -46,6 +46,7 @@ const mapCoursesToSections = (sectionsForAllCourses: SectionAPIResponse[]) => {
 
 export const collectSectionsData = async (
     courseTitleArray: string[],
+    // semesterTitle: string,
 ): Promise<CompiledCoursesData> => {
     //Defensive argument check
     if (courseTitleArray.length === 0 || courseTitleArray === null) {
@@ -55,6 +56,7 @@ export const collectSectionsData = async (
     //Get API responses in array
     const sectionsForAllCourses = await getSectionsForAllCourses(
         courseTitleArray,
+        // semesterTitle,
     );
 
     //Organize responses to map course to its data from API

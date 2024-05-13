@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import { CompiledCoursesData } from "../types/api.types";
 import {
-    Filters,
+    SelectedSections,
     filterSectionsByNumber,
-} from "../util/generationAlgos/filterSectionsByNumber";
+} from "../util/sectionFilters/filterSectionsByNumber";
 import {
     compareSectionNumber,
     deepCloneObject,
@@ -29,7 +29,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("No filters applied", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {};
+        const sectionFilters: SelectedSections = {};
 
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
@@ -41,7 +41,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("One section positive filter - 1", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004"],
         };
 
@@ -71,7 +71,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("One section positive filter - 2", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             ENGL102: ["089"],
         };
 
@@ -100,7 +100,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Mutli section positive filter - 1", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
         };
 
@@ -129,7 +129,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Mutli course positive filters - 1", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
             FIN315: ["002"],
         };
@@ -159,7 +159,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Mutli course positive filters - 2", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
             FIN315: ["002", "102"],
             MATH337: ["002", "H02"],
@@ -191,7 +191,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("One section negative filter - 1", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004"],
         };
 
@@ -222,7 +222,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("One section negative filter - 2", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             ENGL102: ["089"],
         };
 
@@ -253,7 +253,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Mutli section negative filter - 1", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
         };
 
@@ -284,7 +284,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Mutli course negative filters - 1", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
             FIN315: ["002"],
         };
@@ -316,7 +316,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Mutli course negative filters - 2", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
             FIN315: ["002", "102"],
             MATH337: ["002", "H02"],
@@ -350,7 +350,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Invalid course filter", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS280: ["004", "002"],
             FIN315: ["002", "102"],
             MATH337: ["002", "H02"],
@@ -365,7 +365,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
     test("Invalid section filter", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: Filters = {
+        const sectionFilters: SelectedSections = {
             CS114: ["FOO", "002"],
             FIN315: ["002", "102"],
             MATH337: ["002", "BAR"],
@@ -380,7 +380,7 @@ describe("Filtering a course-sections map by specific sections ", () => {
 
 export function didMapGetPositivelyPrunedCorrectly(
     filteredMap: CompiledCoursesData,
-    sectionFilters: Filters,
+    sectionFilters: SelectedSections,
 ): boolean {
     const courseTitlesFiltered = Object.keys(sectionFilters);
 
@@ -409,7 +409,7 @@ export function didMapGetPositivelyPrunedCorrectly(
 export function didMapGetNegativelyPrunedCorrectly(
     rawMap: CompiledCoursesData,
     filteredMap: CompiledCoursesData,
-    sectionFilters: Filters,
+    sectionFilters: SelectedSections,
 ): any {
     const courseTitlesFiltered = Object.keys(sectionFilters);
     for (const courseTitle of courseTitlesFiltered) {
@@ -443,7 +443,7 @@ export function didMapGetNegativelyPrunedCorrectly(
 export function areUnfilteredPropertiesUnaltered(
     rawMap: CompiledCoursesData,
     filteredMap: CompiledCoursesData,
-    sectionFilters: Filters,
+    sectionFilters: SelectedSections,
 ): boolean {
     const courseTitlesFiltered = Object.keys(sectionFilters);
     const courseTitlesNotFiltered = Object.keys(rawMap).filter(

@@ -32,13 +32,13 @@
 
 import { CompiledCoursesData, SectionData } from "../../types/api.types";
 
-export interface Filters {
+export interface SelectedSections {
     [courseTitle: string]: string[]; // Array of section numbers
 }
 
 export function filterSectionsByNumber(
     courseSectionsMap: CompiledCoursesData,
-    sectionFilters: Filters,
+    sectionFilters: SelectedSections,
     action?: "POSITIVE" | "NEGATIVE",
 ): CompiledCoursesData {
     if (Object.keys(sectionFilters).length === 0) {
