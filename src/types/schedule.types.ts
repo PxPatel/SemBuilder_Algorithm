@@ -10,7 +10,7 @@ export type SectionsInDay = SectionId[];
 
 export type Schedule = Record<DayType, SectionsInDay>;
 
-// export type ReportSchedules = Schedule[];
-export type ReportSchedules = string[][];
+export type ReportSchedules = Schedule[];
+// export type ReportSchedules = string[][];
 
 export type LastPointDetails = string[];

@@ -19,6 +19,8 @@
         "src/**/*"
     ],
     "exclude": [
-        "src/logs/*"
+        "src/logs/*",
+        // "src/util/generationAlgos/scheduleGenerator.ts",
+        // "src/util/generationAlgos/paginationGenerator.ts"
     ]
 }

@@ -39,8 +39,14 @@ export interface SelectedSections {
 export function filterSectionsByNumber(
     courseSectionsMap: CompiledCoursesData,
     sectionFilters: SelectedSections,
-    action?: "POSITIVE" | "NEGATIVE",
+    action: "POSITIVE" | "NEGATIVE" = "POSITIVE",
 ): CompiledCoursesData {
+    if (typeof action !== "undefined" && action === null) {
+        throw new Error(
+            `If 'action' parameter is defined, it can only have values "POSITIVE" or "NEGATIVE"`,
+        );
+    }
+
     if (Object.keys(sectionFilters).length === 0) {
         return courseSectionsMap;
     }
@@ -53,10 +59,9 @@ export function filterSectionsByNumber(
         },
     );
 
-    const actionType = action ? action : "POSITIVE";
+    // const actionType = action ? action : "POSITIVE";
 
-    const clonedCourseSectionsMap: CompiledCoursesData =
-        courseSectionsMap;
+    const clonedCourseSectionsMap: CompiledCoursesData = courseSectionsMap;
 
     for (const courseTitle in sectionFilters) {
         const sectionsToFilter = sectionFilters[courseTitle];
@@ -78,12 +83,11 @@ export function filterSectionsByNumber(
 
         //POS = Only those sections should be in dataset
         //NEG = Those specific sections should not be in the dataset
-
         for (const sectionNumber of sectionsMapKeys) {
             const sectionExists = sectionsToFilter.includes(sectionNumber);
             if (
-                (actionType === "POSITIVE" && !sectionExists) ||
-                (actionType === "NEGATIVE" && sectionExists)
+                (action === "POSITIVE" && !sectionExists) ||
+                (action === "NEGATIVE" && sectionExists)
             ) {
                 delete clonedCourseSectionsMap[courseTitle][sectionNumber];
             }

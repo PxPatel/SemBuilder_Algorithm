@@ -16,17 +16,14 @@ export type TimeOptions = {
 
 export function filterSectionByTime(
     courseSectionData: CompiledCoursesData,
-    timeFilters?: TimeOptions,
+    timeFilters: TimeOptions,
 ): CompiledCoursesData {
-    if (typeof timeFilters === "undefined") {
-        return courseSectionData;
-    }
-
     const { before, after } = timeFilters;
 
     if (typeof before === "undefined" && typeof after === "undefined") {
         return courseSectionData;
     }
+
 
     if (before === null || after === null) {
         throw new Error(
@@ -37,7 +34,7 @@ export function filterSectionByTime(
     if (before !== undefined && after !== undefined && before >= after) {
         throw new Error("'before' must be less than 'after'.");
     }
-    for (const courseTitle of Object.keys(courseSectionData)) {
+    for (const courseTitle in courseSectionData) {
         const sectionNumbers = Object.keys(courseSectionData[courseTitle]);
 
         for (const sectionNumber of sectionNumbers) {
@@ -47,6 +44,10 @@ export function filterSectionByTime(
             let shouldDelete = false;
 
             for (let i = 0; i < start_times.length; i++) {
+                if(start_times[i] === null || end_times[i] === null){
+                    continue;    
+                }
+
                 if (
                     (before !== undefined && start_times[i] < before) ||
                     (after !== undefined && end_times[i] > after)

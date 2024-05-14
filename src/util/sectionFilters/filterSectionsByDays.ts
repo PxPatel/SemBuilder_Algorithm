@@ -9,21 +9,34 @@
  * Maybe other types would be implemented in future, but only negative filtering for now
  */
 
-import { CompiledCoursesData, Day } from "../../types/api.types";
+import { CompiledCoursesData, Day, DayType } from "../../types/api.types";
 
 export function filterSectionByDays(
     courseSectionsMap: CompiledCoursesData,
-    unwantedDays: Day[],
-    // action?: "NEGATIVE",
+    unwantedDays: DayType[],
 ): CompiledCoursesData {
     if (unwantedDays.length === 0) {
         return courseSectionsMap;
     }
 
-    for (const courseTitle of Object.keys(courseSectionsMap)) {
-        for (const sectionNumber of Object.keys(
-            courseSectionsMap[courseTitle],
-        )) {
+    //Defensively check the days array
+    const possibleDayValues = ["M", "T", "W", "R", "F", "S", "X"];
+    for (const day of unwantedDays) {
+        if (day.length != 1 || !possibleDayValues.includes(day)) {
+            throw new Error(
+                "Invalid day element in 'unwantedDays' array parameter",
+            );
+        }
+    }
+
+    if (hasDuplicates(unwantedDays)) {
+        throw new Error(
+            "The 'unwantedDays' parameter can not have duplicate values",
+        );
+    }
+
+    for (const courseTitle in courseSectionsMap) {
+        for (const sectionNumber in courseSectionsMap[courseTitle]) {
             if (
                 unwantedDays.some(unwantedDay =>
                     courseSectionsMap[courseTitle][sectionNumber].days.includes(
@@ -37,4 +50,18 @@ export function filterSectionByDays(
     }
 
     return courseSectionsMap;
+}
+
+function hasDuplicates(a: string[]) {
+    const uniqueValues = new Set();
+
+    // Iterate through the array
+    for (let i = 0; i < a.length; i++) {
+        // If the value already exists in the Set, return true
+        if (uniqueValues.has(a[i])) {
+            return true;
+        }
+        // Otherwise, add the value to the Set
+        uniqueValues.add(a[i]);
+    }
 }

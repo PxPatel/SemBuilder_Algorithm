@@ -31,14 +31,14 @@ interface AltSection {
     co_sem_id: string;
     credits: number;
     crn: number;
-    days: DayType[] | null;
-    end_times: number[] | null;
+    days: DayType[];
+    end_times: (number | null)[];
     info: string | null;
     instructor: string | null;
-    location: string[] | null;
+    location: (number | null)[];
     section_id: string;
     section_number: string;
-    start_times: number[] | null;
+    start_times: (number | null)[];
     status: string;
 }
 
