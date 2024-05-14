@@ -10,17 +10,28 @@ import {
     TimeOptions,
     filterSectionByTime,
 } from "./sectionFilters/filterSectionsByTime";
+import { LastPointDetails } from "../types/schedule.types";
+
+export type ExtraOptions = {
+    lastPointDetails?: LastPointDetails;
+    generateAmount?: number;
+    allowIncompleteSections?: boolean;
+};
 
 export async function generateFilteredSchedules(
     sectionFilters: SelectedSections,
     unwantedDays: Day[],
     timeFilters: TimeOptions,
+    customOptions: ExtraOptions = {},
 ): Promise<void> {
     const READ_FROM_PATH =
         "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data.json";
 
     const WRITE_TO_PATH =
         "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data2.json";
+
+    const { lastPointDetails, generateAmount, allowIncompleteSections } =
+        customOptions;
 
     try {
         // const relevantCourseData = await collectSectionsData(inputObject);
@@ -33,13 +44,16 @@ export async function generateFilteredSchedules(
         filterSectionByTime(relevantCoursesData, timeFilters);
 
         const response = paginationGenerator(relevantCoursesData, {
-            lastPointDetails: [],
-            generateAmount: 100,
+            lastPointDetails: lastPointDetails ?? [],
+            generateAmount: generateAmount ?? 100,
+            allowIncompleteSections: allowIncompleteSections ?? false,
         });
+
+        // const response = paginationGenerator(relevantCoursesData);
 
         writeFileSync(WRITE_TO_PATH, JSON.stringify(response));
 
-        console.log(response[0].length);
+        console.log("Number of schedules generated:", response[0].length);
     } catch (error) {
         console.log(error);
     }

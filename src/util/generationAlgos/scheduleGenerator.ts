@@ -75,7 +75,7 @@ export function auxScheduleGenerator(
 ): void {
     if (dataKeys.length === dataKeyIndex) {
         // resultArray.push(deepCloneObject(currentSchedule));
-        resultArray.push(simplySchedule(currentSchedule));
+        // resultArray.push(simplySchedule(currentSchedule));
         return;
     }
 

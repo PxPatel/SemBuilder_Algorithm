@@ -51,9 +51,10 @@ import {
 export type GenerationOptions = {
     lastPointDetails?: LastPointDetails;
     generateAmount?: number;
+    allowIncompleteSections?: boolean;
 };
 
-const DEFAULT_GENERATION_AMOUNT = 20;
+const DEFAULT_GENERATION_AMOUNT = 25;
 
 /**
  *
@@ -64,24 +65,35 @@ const DEFAULT_GENERATION_AMOUNT = 20;
  */
 export function paginationGenerator(
     courseSectionsMap: CompiledCoursesData,
-    generationOptions?: GenerationOptions,
+    generationOptions: GenerationOptions = {},
 ): [ReportSchedules, LastPointDetails] {
-    const { lastPointDetails, generateAmount } = generationOptions;
+    const { lastPointDetails, generateAmount, allowIncompleteSections } =
+        generationOptions;
 
     if (lastPointDetails === null) {
         return [[], null];
     }
 
-    if (generateAmount === null) {
+    if (
+        typeof generateAmount !== "undefined" &&
+        (generateAmount === null || typeof generateAmount !== "number")
+    ) {
         throw new Error(
             `Value for 'generateAmount' parameter is not valid: ${generateAmount}`,
         );
     }
 
-    const LPD =
-        typeof lastPointDetails === "undefined" || lastPointDetails.length === 0
-            ? []
-            : lastPointDetails;
+    if (
+        typeof generateAmount !== "undefined" &&
+        (allowIncompleteSections === null ||
+            typeof allowIncompleteSections !== "boolean")
+    ) {
+        throw new Error(
+            "'allowIncompleteSections' parameter must be a boolean value",
+        );
+    }
+
+    const LPD = typeof lastPointDetails === "undefined" ? [] : lastPointDetails;
 
     if (areDuplicatesInLPD(LPD)) {
         throw new Error(`Last Point Details has a duplicate course: ${LPD}`);
@@ -113,6 +125,7 @@ export function paginationGenerator(
         LPD,
         generateNum,
         generatedSchedules,
+        allowIncompleteSections ? allowIncompleteSections : false,
     );
 
     return [generatedSchedules, newLDP];
@@ -127,13 +140,14 @@ export function auxPaginationGenerator(
     lastPointDetails: LastPointDetails,
     generateNum: number,
     generatedSchedules: ReportSchedules,
+    allowIncompleteSections: boolean,
 ): [boolean, LastPointDetails] {
     //If no more courses to explore
     //Push the currentSchedule to the results
     //After pushing, if the results reach a limit, return true and the LPD
     if (courseTitleArray.length === keyIndex) {
-        // generatedSchedules.push(deepCloneObject(currentSchedule));
-        generatedSchedules.push(simplySchedule(currentSchedule));
+        generatedSchedules.push(deepCloneObject(currentSchedule));
+        // generatedSchedules.push(simplySchedule(currentSchedule));
 
         if (generatedSchedules.length === generateNum) {
             return [true, simplySchedule(currentSchedule)];
@@ -144,6 +158,11 @@ export function auxPaginationGenerator(
     const selectedCourseTitle = courseTitleArray[keyIndex];
     const sectionsOfSelectedCourse = sortedSectionsMap[selectedCourseTitle];
     const countOfSectionsOfSelectedCourse = sectionsOfSelectedCourse.length;
+
+    //If a course has no sections to explore, end the
+    if (countOfSectionsOfSelectedCourse === 0) {
+        return [true, null];
+    }
 
     const initialStartingPoint = getInitiatingIndexFromLPD(
         selectedCourseTitle,
@@ -167,6 +186,7 @@ export function auxPaginationGenerator(
                 courseSectionsMap[selectedCourseTitle][sectionNumber],
                 currentSchedule,
                 courseSectionsMap,
+                allowIncompleteSections,
             )
         ) {
             const daysOfSection =
@@ -188,6 +208,7 @@ export function auxPaginationGenerator(
                 lastPointDetails,
                 generateNum,
                 generatedSchedules,
+                allowIncompleteSections,
             );
 
             if (isFinished) {
@@ -304,23 +325,31 @@ export function simplySchedule(currentSchedule: Schedule): string[] {
 }
 
 function doesScheduleHaveConflict(
-    sectionData: SectionData,
+    sectionDataInQ: SectionData,
     currentSchedule: Schedule,
     data: CompiledCoursesData,
+    allowIncompleteSections: boolean,
 ): boolean {
-    if (sectionData === null) {
+    if (sectionDataInQ === null) {
         throw Error("No section data provided");
     }
 
     if (
-        sectionData.days.length === 0 ||
-        sectionData.days.includes("X") ||
-        sectionData.status.toUpperCase() === "CANCELLED"
+        sectionDataInQ.days.length === 0 ||
+        sectionDataInQ.status.toUpperCase() === "CANCELLED"
     ) {
         return true;
     }
 
-    for (const day of sectionData.days) {
+    if (!allowIncompleteSections && sectionDataInQ.days.includes("X")) {
+        return true;
+    }
+
+    for (const day of sectionDataInQ.days) {
+        if (day === "X" && allowIncompleteSections) {
+            continue;
+        }
+
         //Iterate through the section_ids of the sections
         //currently in currSchedule for a particular day
         for (const section_id of currentSchedule[day]) {
@@ -334,24 +363,45 @@ function doesScheduleHaveConflict(
                 data[courseName][sectionNumber].days.indexOf(day);
             //With the matchingIndex, find the corresponding start and end time of the section
             //for the particular day
-            const startTime =
+            const startTimeOfOne =
                 data[courseName][sectionNumber].start_times[matchIndex];
-            const endTime =
+            const endTimeOfOne =
                 data[courseName][sectionNumber].end_times[matchIndex];
+
+            const startTimeInQ =
+                sectionDataInQ.start_times[sectionDataInQ.days.indexOf(day)];
+
+            const endTimeInQ =
+                sectionDataInQ.end_times[sectionDataInQ.days.indexOf(day)];
+
+            // const foo = data[courseName][sectionNumber]
+
+            if (
+                startTimeInQ === null ||
+                endTimeInQ === null ||
+                startTimeOfOne === null ||
+                endTimeOfOne === null
+            ) {
+                if (allowIncompleteSections) {
+                    continue;
+                } else {
+                    return true;
+                }
+            }
 
             //If the start or end time of the selectedSection is inbetween
             //the times of the traversing section
             //return true to report the conflict
             if (
                 isTimeInBetweenInterval(
-                    sectionData.start_times[sectionData.days.indexOf(day)],
-                    startTime,
-                    endTime,
+                    startTimeInQ,
+                    startTimeOfOne,
+                    endTimeOfOne,
                 ) ||
                 isTimeInBetweenInterval(
-                    sectionData.end_times[sectionData.days.indexOf(day)],
-                    startTime,
-                    endTime,
+                    endTimeInQ,
+                    startTimeOfOne,
+                    endTimeOfOne,
                 )
             ) {
                 return true;
@@ -378,6 +428,10 @@ function isTimeInBetweenInterval(
     earlierBound: number,
     laterBound: number,
 ): boolean {
+    if (x === null) {
+        throw Error("Not a valid value for 'x'");
+    }
+
     return x >= earlierBound && x <= laterBound;
 }
 
