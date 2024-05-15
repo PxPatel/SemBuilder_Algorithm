@@ -84,7 +84,7 @@ export function paginationGenerator(
     }
 
     if (
-        typeof generateAmount !== "undefined" &&
+        typeof allowIncompleteSections !== "undefined" &&
         (allowIncompleteSections === null ||
             typeof allowIncompleteSections !== "boolean")
     ) {
@@ -93,11 +93,16 @@ export function paginationGenerator(
         );
     }
 
-    const LPD = typeof lastPointDetails === "undefined" ? [] : lastPointDetails;
-
-    if (areDuplicatesInLPD(LPD)) {
-        throw new Error(`Last Point Details has a duplicate course: ${LPD}`);
+    if (
+        typeof lastPointDetails !== "undefined" &&
+        areDuplicatesInLPD(lastPointDetails)
+    ) {
+        throw new Error(
+            `Last Point Details has a duplicate course: ${lastPointDetails}`,
+        );
     }
+
+    const LPD = typeof lastPointDetails === "undefined" ? [] : lastPointDetails;
 
     const generateNum = generateAmount
         ? generateAmount

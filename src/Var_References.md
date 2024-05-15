@@ -14,7 +14,7 @@ courseNumber = 114, 102, 280H, 288
 
 courseTitle: CS114, ENGL102
 
-courseSemesterTitle = Spring2024_CE332, Fall2023_CS114
+courseSemesterTitle/ID = Spring2024_CE332, Fall2023_CS114
 
 ---
 

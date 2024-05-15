@@ -1,8 +1,8 @@
 import { Day } from "../types/api.types";
-import { Schedule } from "../types/schedule.types";
 import { SelectedSections } from "../util/sectionFilters/filterSectionsByNumber";
 import { generateFilteredSchedules } from "../util/generateFilteredSchedules";
 import { TimeOptions } from "../util/sectionFilters/filterSectionsByTime";
+import { collectSectionsData } from "../util/collectSectionsData";
 
 const inputObject = [
     "CS114",
@@ -21,19 +21,22 @@ const main = async () => {
         // MATH337: ["002"],
         // YWCC207: ["004"],
     };
+
     const unwantedDay: Day[] = ["M", "F", "S"];
 
     const timeFilters: TimeOptions = {
-        // before: 50000000,
-        // after: 100000000,
+        before: undefined,
+        after: undefined,
     };
 
     console.time("Running generation");
 
-    await generateFilteredSchedules(sectionFilters, unwantedDay, timeFilters, {
-        generateAmount: 1000,
-        allowIncompleteSections: true,
-    });
+    // await generateFilteredSchedules(sectionFilters, unwantedDay, timeFilters, {
+    //     generateAmount: 139,
+    //     allowIncompleteSections: undefined,
+    // });
+
+    // await collectSectionsData(["CS114", "ENGL101"], "winter_2023-2024");
 
     console.timeEnd("Running generation");
 };

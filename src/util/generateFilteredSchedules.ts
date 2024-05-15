@@ -3,7 +3,7 @@ import {
     SelectedSections,
     filterSectionsByNumber,
 } from "./sectionFilters/filterSectionsByNumber";
-import { Day } from "../types/api.types";
+import { CompiledCoursesData, Day } from "../types/api.types";
 import { filterSectionByDays } from "./sectionFilters/filterSectionsByDays";
 import { paginationGenerator } from "./generationAlgos/paginationGenerator";
 import {
@@ -35,21 +35,21 @@ export async function generateFilteredSchedules(
 
     try {
         // const relevantCourseData = await collectSectionsData(inputObject);
-        const relevantCoursesData = await JSON.parse(
+        const relevantCoursesData = (await JSON.parse(
             readFileSync(READ_FROM_PATH, "utf-8"),
-        );
+        )) as CompiledCoursesData;
 
-        filterSectionsByNumber(relevantCoursesData, sectionFilters, "POSITIVE");
+        filterSectionsByNumber(relevantCoursesData, sectionFilters, {
+            action: "POSITIVE",
+        });
         filterSectionByDays(relevantCoursesData, unwantedDays);
         filterSectionByTime(relevantCoursesData, timeFilters);
 
         const response = paginationGenerator(relevantCoursesData, {
-            lastPointDetails: lastPointDetails ?? [],
-            generateAmount: generateAmount ?? 100,
-            allowIncompleteSections: allowIncompleteSections ?? false,
+            lastPointDetails: lastPointDetails,
+            generateAmount: generateAmount,
+            allowIncompleteSections: allowIncompleteSections,
         });
-
-        // const response = paginationGenerator(relevantCoursesData);
 
         writeFileSync(WRITE_TO_PATH, JSON.stringify(response));
 

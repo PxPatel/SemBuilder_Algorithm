@@ -1,13 +1,11 @@
-import { CompiledCoursesData } from "../../types/api.types";
-
 /**
  * So this is function will take a course-sections map and then filter section
  * based on the times of the sections. There will be two filter types: No class before and no class after
  * If given before = 100, all the start times for the sections must be after 100.
  * Similiarly, if after = 100, all the end times for the sections must be before 100.
- *
- *
  */
+
+import { CompiledCoursesData } from "../../types/api.types";
 
 export type TimeOptions = {
     before?: number;
@@ -23,7 +21,6 @@ export function filterSectionByTime(
     if (typeof before === "undefined" && typeof after === "undefined") {
         return courseSectionData;
     }
-
 
     if (before === null || after === null) {
         throw new Error(
@@ -44,8 +41,8 @@ export function filterSectionByTime(
             let shouldDelete = false;
 
             for (let i = 0; i < start_times.length; i++) {
-                if(start_times[i] === null || end_times[i] === null){
-                    continue;    
+                if (start_times[i] === null || end_times[i] === null) {
+                    continue;
                 }
 
                 if (

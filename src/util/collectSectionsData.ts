@@ -7,14 +7,14 @@ const SEMESTER = "Spring_2024";
 
 const getSectionsForAllCourses = async (
     courseTitleArray: string[],
-    // semesterTitle?: string,
+    semesterTitle?: string,
 ) => {
     const promises = [];
 
     for (let i = 0; i < courseTitleArray.length; ++i) {
         promises.push(
             callSectionsAPI({
-                semester: SEMESTER,
+                semester: semesterTitle ?? SEMESTER,
                 course: courseTitleArray[i],
             }),
         );
@@ -30,7 +30,7 @@ const mapCoursesToSections = (sectionsForAllCourses: SectionAPIResponse[]) => {
     for (const sectionsForCourse of sectionsForAllCourses) {
         if (sectionsForCourse.item_count !== 0) {
             const courseTitle =
-                sectionsForCourse.data[0].course_semester_info.co_sem_id.split(
+                sectionsForCourse.data[0].course_semester_info.course_semester_id.split(
                     "_",
                 )[1];
 
@@ -46,7 +46,7 @@ const mapCoursesToSections = (sectionsForAllCourses: SectionAPIResponse[]) => {
 
 export const collectSectionsData = async (
     courseTitleArray: string[],
-    // semesterTitle: string,
+    semesterTitle?: string,
 ): Promise<CompiledCoursesData> => {
     //Defensive argument check
     if (courseTitleArray.length === 0 || courseTitleArray === null) {
@@ -56,7 +56,7 @@ export const collectSectionsData = async (
     //Get API responses in array
     const sectionsForAllCourses = await getSectionsForAllCourses(
         courseTitleArray,
-        // semesterTitle,
+        semesterTitle,
     );
 
     //Organize responses to map course to its data from API

@@ -31,24 +31,68 @@
  */
 
 import { CompiledCoursesData, SectionData } from "../../types/api.types";
+import { deepCloneObject } from "../generationAlgos/paginationGenerator";
+import { filterSectionIfHonors } from "./filterSectionsIfHonors";
 
 export interface SelectedSections {
-    [courseTitle: string]: string[]; // Array of section numbers
+    [courseTitle: string]: string[];
+    // Array of section numbers
 }
+
+export type SecNumOptions = {
+    action?: "POSITIVE" | "NEGATIVE";
+    globallyAllowHonors?: boolean;
+    localDisallowHonorsList?: {
+        [courseTitle: string]: boolean;
+    };
+};
+
+const DEFAULT_SEC_NUM_OPTIONS: SecNumOptions = {
+    action: "POSITIVE",
+    globallyAllowHonors: true,
+    localDisallowHonorsList: {},
+};
 
 export function filterSectionsByNumber(
     courseSectionsMap: CompiledCoursesData,
     sectionFilters: SelectedSections,
-    action: "POSITIVE" | "NEGATIVE" = "POSITIVE",
+    specialOptions: SecNumOptions = {},
 ): CompiledCoursesData {
-    if (typeof action !== "undefined" && action === null) {
+    const { action, globallyAllowHonors, localDisallowHonorsList } = {
+        ...DEFAULT_SEC_NUM_OPTIONS,
+        ...specialOptions,
+    };
+
+    if (
+        typeof action !== "undefined" &&
+        (action === null || typeof action !== "string")
+    ) {
         throw new Error(
-            `If 'action' parameter is defined, it can only have values "POSITIVE" or "NEGATIVE"`,
+            `'action' can only have values "POSITIVE" or "NEGATIVE", if parameter is inputted`,
         );
     }
 
-    if (Object.keys(sectionFilters).length === 0) {
+    if (
+        typeof globallyAllowHonors !== "undefined" &&
+        (globallyAllowHonors === null ||
+            typeof globallyAllowHonors !== "boolean")
+    ) {
+        throw new Error(
+            `'globallyAllowHonors' must be a boolean value if inputted`,
+        );
+    }
+
+    if (Object.keys(sectionFilters).length === 0 && globallyAllowHonors) {
         return courseSectionsMap;
+    }
+
+    if (
+        typeof localDisallowHonorsList !== "undefined" &&
+        localDisallowHonorsList === null
+    ) {
+        throw new Error(
+            `'localDisallowHonorsList' can not be null in options object`,
+        );
     }
 
     isArraySubsetOfOther(
@@ -59,17 +103,9 @@ export function filterSectionsByNumber(
         },
     );
 
-    // const actionType = action ? action : "POSITIVE";
-
-    const clonedCourseSectionsMap: CompiledCoursesData = courseSectionsMap;
-
     for (const courseTitle in sectionFilters) {
         const sectionsToFilter = sectionFilters[courseTitle];
-        if (sectionsToFilter.length === 0) continue;
-
-        const sectionsMapKeys = Object.keys(
-            clonedCourseSectionsMap[courseTitle],
-        );
+        const sectionsMapKeys = Object.keys(courseSectionsMap[courseTitle]);
 
         isArraySubsetOfOther(
             sectionsToFilter,
@@ -80,30 +116,61 @@ export function filterSectionsByNumber(
                 );
             },
         );
+    }
 
-        //POS = Only those sections should be in dataset
-        //NEG = Those specific sections should not be in the dataset
-        for (const sectionNumber of sectionsMapKeys) {
-            const sectionExists = sectionsToFilter.includes(sectionNumber);
-            if (
-                (action === "POSITIVE" && !sectionExists) ||
-                (action === "NEGATIVE" && sectionExists)
-            ) {
-                delete clonedCourseSectionsMap[courseTitle][sectionNumber];
+    const cloneCourseSectionsMap =
+        action === "POSITIVE" ? deepCloneObject(courseSectionsMap) : undefined;
+
+    const areFiltersEmpty = Object.keys(sectionFilters).every(
+        courseTitle => sectionFilters[courseTitle].length === 0,
+    );
+
+    //If globallyHonors false removed then all get removed, no exception
+    if (!globallyAllowHonors) {
+        filterSectionIfHonors(courseSectionsMap);
+    }
+    //Locally remove honors on particular courses
+    else if (Object.keys(localDisallowHonorsList).length !== 0) {
+        const coursesToFilterOutHonors = Object.keys(
+            localDisallowHonorsList,
+        ).filter(courseTitle => localDisallowHonorsList[courseTitle]);
+
+        if (coursesToFilterOutHonors.length !== 0)
+            filterSectionIfHonors(courseSectionsMap, coursesToFilterOutHonors);
+    }
+
+    if (areFiltersEmpty) {
+        return courseSectionsMap;
+    }
+
+    for (const courseTitle in sectionFilters) {
+        const sectionsToFilter = sectionFilters[courseTitle];
+        if (sectionsToFilter.length === 0) continue;
+
+        if (action === "POSITIVE") {
+            //Clear the secitons and initialize the courseTitle key
+            //in the CSM dictionary for the course.
+            const newSectionsData: Record<string, SectionData> = {};
+
+            //For each section in sectionsToFilter, lookup in clone, and add to CSM
+            for (const sectionNumber of sectionsToFilter) {
+                newSectionsData[sectionNumber] =
+                    cloneCourseSectionsMap[courseTitle][sectionNumber];
+            }
+
+            courseSectionsMap[courseTitle] = newSectionsData;
+        }
+
+        if (action === "NEGATIVE") {
+            for (const sectionToPrune of sectionsToFilter) {
+                //sectionToPrune if Honors do not exist. So verify
+                if (courseSectionsMap[courseTitle][sectionToPrune]) {
+                    delete courseSectionsMap[courseTitle][sectionToPrune];
+                }
             }
         }
     }
-
-    return clonedCourseSectionsMap;
-}
-
-function deleteSectionsFromMap(
-    sectionsToPrune: string[],
-    sectionsMap: Record<string, SectionData>,
-) {
-    for (const pruningSectionNumber of sectionsToPrune) {
-        delete sectionsMap[pruningSectionNumber];
-    }
+    return courseSectionsMap;
 }
 
 function isArraySubsetOfOther(
@@ -116,4 +183,12 @@ function isArraySubsetOfOther(
             callback(item);
         }
     });
+}
+
+export function clearDictionary<T extends Record<string, unknown>>(obj: T): T {
+    Object.keys(obj).forEach(key => {
+        delete obj[key];
+    });
+
+    return obj;
 }

@@ -43,7 +43,7 @@ interface AltSection {
 }
 
 interface CourseSemester {
-    co_sem_id: string;
+    course_semester_id: string;
     course_id: number;
     semester_id: string;
 }
