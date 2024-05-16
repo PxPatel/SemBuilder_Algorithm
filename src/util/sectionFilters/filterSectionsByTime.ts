@@ -5,7 +5,7 @@
  * Similiarly, if after = 100, all the end times for the sections must be before 100.
  */
 
-import { CompiledCoursesData } from "../../types/api.types";
+import { CompiledCoursesData } from "../../types/data.types";
 
 export type TimeOptions =
     | {

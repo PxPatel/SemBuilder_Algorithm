@@ -1,4 +1,4 @@
-import { QUERY_PARAMETERS, SectionAPIResponse } from "../types/api.types";
+import { QUERY_PARAMETERS, SectionAPIResponse } from "../types/data.types";
 
 export const callSectionsAPI = async (
     queryParameters: QUERY_PARAMETERS,

@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { CompiledCoursesData, DayType } from "../types/api.types";
+import { CompiledCoursesData, DayType } from "../types/data.types";
 import { filterSectionByDays } from "../util/sectionFilters/filterSectionsByDays";
 import { deepCloneObject } from "../util/generationAlgos/paginationGenerator";
 

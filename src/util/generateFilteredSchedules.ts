@@ -4,7 +4,7 @@ import {
     SelectedSections,
     filterSectionsByNumber,
 } from "./sectionFilters/filterSectionsByNumber";
-import { CompiledCoursesData, Day } from "../types/api.types";
+import { CompiledCoursesData, Day } from "../types/data.types";
 import { filterSectionByDays } from "./sectionFilters/filterSectionsByDays";
 import {
     DEFAULT_GENERATION_AMOUNT,

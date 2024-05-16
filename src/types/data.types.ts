@@ -52,8 +52,3 @@ export interface CompiledCoursesData {
     [courseTitle: string]: Record<string, SectionData>;
 }
 
-export type DeepClone<T> = T extends Record<string, unknown>
-    ? {
-          [K in keyof T]: DeepClone<T[K]>;
-      }
-    : T;

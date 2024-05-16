@@ -1,15 +1,4 @@
-/**
- * Similar to filterSectionsByNumber(), this pre-premutation function will prune the data map based on a day filter
- * Essentially, given an array of the days and a course-sections map, the program will iterate through all courses
- * and their sections and prune/keep a section based on its .days property
- *
- * Negative filtering: means that the days provided in the parameters are not the days on which the section takes place
- * Other words: section.day has no common element with param.days
- *
- * Maybe other types would be implemented in future, but only negative filtering for now
- */
-
-import { CompiledCoursesData, Day, DayType } from "../../types/api.types";
+import { CompiledCoursesData, Day, DayType } from "../../types/data.types";
 
 export function filterSectionByDays(
     courseSectionsMap: CompiledCoursesData,

@@ -1,4 +1,4 @@
-import { CompiledCoursesData, SectionAPIResponse } from "../types/api.types";
+import { CompiledCoursesData, SectionAPIResponse } from "../types/data.types";
 import { callSectionsAPI } from "./callSectionsAPI";
 
 //TODO:Currently hard-coded, but intending to create a more comprehensive mechanism

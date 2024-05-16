@@ -1,4 +1,5 @@
 /**
+ * Thoughts:
  * So since an entire list of schedules is not feasibly to store, a pagination mechanism will be implemented
  * Each call will generate x number more schedules to be presented. This saves computation effort and memory
  * The recursive program will continue until a certain array length is achieved and then dismantle the stack
@@ -38,14 +39,14 @@
 
 import {
     CompiledCoursesData,
-    DeepClone,
     SectionData,
     DayType,
-} from "../../types/api.types";
+} from "../../types/data.types";
 import {
     LastPointDetails,
     ReportSchedules,
     Schedule,
+    DeepClone,
 } from "../../types/schedule.types";
 
 export type GenerationOptions = {

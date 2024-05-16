@@ -1,4 +1,4 @@
-import { Day } from "../types/api.types";
+import { Day } from "../types/data.types";
 import { SelectedSections } from "../util/sectionFilters/filterSectionsByNumber";
 import {
     ExtraOptions,
@@ -15,7 +15,6 @@ const courseTitleToFetch: string[] = [
     // "YWCC207",
     // "MATH337",
     // "FIN315",
-
     //Set 2 of courses
     // "CS241",
     // "CS280",

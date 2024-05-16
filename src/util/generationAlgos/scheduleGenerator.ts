@@ -1,12 +1,13 @@
+import { CompiledCoursesData, SectionData } from "../../types/data.types";
 import {
-    CompiledCoursesData,
+    ReportSchedules,
+    Schedule,
     DeepClone,
-    SectionData,
-} from "../../types/api.types";
-import { ReportSchedules, Schedule } from "../../types/schedule.types";
+} from "../../types/schedule.types";
 import { simplySchedule } from "./paginationGenerator";
 
 /**
+ * Thoughts:
  * So the larger algorithm needs to output an array of Schedules
  * Each schedule is an object of days of the week (Monday to Saturday)
  *
@@ -18,27 +19,15 @@ import { simplySchedule } from "./paginationGenerator";
  * Else
  * - Continue to next iteration
  * Finally
- *
- *
+ * 
  * Base cases
  * If keys array is empty, add the schedule to the Schedule[] and return
- *
  *
  * Recur function arguments:
  * - Data: Record<Course, SectionAPIResponse>
  * - DataKeys: Course[]
  * - ResultArray: Schedule[]
  * - CurrentSchedule: Schedule
- */
-
-/**
- * So since an entire list of schedules is not feasibly to store, a pagination mechanism will be implemented
- * Each call will generate x number more schedules to be presented. This saves computation effort and memory
- * The recursive program will continue until a certain array length is achieved and then dismantle the stack
- *
- * To call for more generation, a new methodology must be designed. Online research for help.
- * Current thoughts are more parameter guided recursion. From the last input, the function will also output
- * an object detailing an image of the stack.
  */
 
 export function scheduleGenerator(

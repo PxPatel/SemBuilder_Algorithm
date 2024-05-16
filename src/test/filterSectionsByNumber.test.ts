@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { CompiledCoursesData } from "../types/api.types";
+import { CompiledCoursesData } from "../types/data.types";
 import {
     SecNumOptions,
     SelectedSections,
