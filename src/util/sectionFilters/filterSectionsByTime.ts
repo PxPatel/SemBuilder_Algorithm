@@ -7,10 +7,15 @@
 
 import { CompiledCoursesData } from "../../types/api.types";
 
-export type TimeOptions = {
-    before?: number;
-    after?: number;
-};
+export type TimeOptions =
+    | {
+          before?: number;
+          after?: number;
+      }
+    | {
+          before?: string;
+          after?: string;
+      };
 
 export function filterSectionByTime(
     courseSectionData: CompiledCoursesData,
@@ -28,7 +33,28 @@ export function filterSectionByTime(
         );
     }
 
-    if (before !== undefined && after !== undefined && before >= after) {
+    //Convert if string
+    const earlyCap =
+        typeof before === "number"
+            ? before
+            : typeof before === "string"
+            ? convertStringTimeToNumber(before)
+            : undefined;
+
+    const lateCap =
+        typeof after === "number"
+            ? after
+            : typeof after === "string"
+            ? convertStringTimeToNumber(after)
+            : undefined;
+
+    console.log("TIMES:", earlyCap, lateCap);
+
+    if (
+        earlyCap !== undefined &&
+        lateCap !== undefined &&
+        earlyCap >= lateCap
+    ) {
         throw new Error("'before' must be less than 'after'.");
     }
     for (const courseTitle in courseSectionData) {
@@ -46,8 +72,8 @@ export function filterSectionByTime(
                 }
 
                 if (
-                    (before !== undefined && start_times[i] < before) ||
-                    (after !== undefined && end_times[i] > after)
+                    (earlyCap !== undefined && start_times[i] < earlyCap) ||
+                    (lateCap !== undefined && end_times[i] > lateCap)
                 ) {
                     shouldDelete = true;
                     break;
@@ -59,6 +85,33 @@ export function filterSectionByTime(
             }
         }
     }
-
     return courseSectionData;
+}
+
+function convertStringTimeToNumber(timeStr: string): number {
+    try {
+        if (
+            typeof timeStr !== "string" ||
+            timeStr === "" ||
+            timeStr === "TBA"
+        ) {
+            undefined;
+        }
+
+        // Parse time
+        const [time, meridiem] = timeStr.split(" ");
+        let hours = parseInt(time.split(":")[0]);
+        const minutes = parseInt(time.split(":")[1]);
+        const period = meridiem.toUpperCase();
+        hours = period === "PM" && hours !== 12 ? hours + 12 : hours;
+
+        // Calculate milliseconds from midnight
+        const startMilliseconds = (hours * 60 + minutes) * 60 * 1000;
+
+        return startMilliseconds;
+    } catch (error) {
+        console.log("ERROR IN TIME", error.message);
+        console.log(timeStr);
+        throw Error;
+    }
 }

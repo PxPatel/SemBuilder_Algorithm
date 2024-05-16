@@ -1,44 +1,89 @@
 import { Day } from "../types/api.types";
 import { SelectedSections } from "../util/sectionFilters/filterSectionsByNumber";
-import { generateFilteredSchedules } from "../util/generateFilteredSchedules";
+import {
+    ExtraOptions,
+    generateFilteredSchedules,
+} from "../util/generateFilteredSchedules";
 import { TimeOptions } from "../util/sectionFilters/filterSectionsByTime";
 import { collectSectionsData } from "../util/collectSectionsData";
 
-const inputObject = [
-    "CS114",
-    "ENGL102",
-    "IS350",
-    "YWCC207",
-    "MATH337",
-    "FIN315",
+const courseTitleToFetch: string[] = [
+    //Set 1 of courses
+    // "CS114",
+    // "ENGL102",
+    // "IS350",
+    // "YWCC207",
+    // "MATH337",
+    // "FIN315",
+
+    //Set 2 of courses
+    // "CS241",
+    // "CS280",
+    // "CS301",
+    // "CS331",
+    // "CS332",
+    // "COM312",
+    // "YWCC307",
 ];
 
 const main = async () => {
+    //Sample filters based for specific sections
     const sectionFilters: SelectedSections = {
         // CS114: ["002", "004"],
         // ENGL102: ["089"],
-        // IS350: ["102"],
+        // IS350: ["002"],
         // MATH337: ["002"],
         // YWCC207: ["004"],
+        //-------
+        //-------
+        //-------
+        // CS241: ["003"],
+        // CS280: ["009"],
+        // CS301: ["001"],
+        // CS331: ["001"],
+        // CS332: ["001"],
+        // COM312: ["025"],
+        // YWCC307: ["007"],
     };
 
-    const unwantedDay: Day[] = ["M", "F", "S"];
+    //Filter based on days that the user desires no class
+    const unwantedDay: Day[] = [];
 
+    //Filter can be numbers or strings, but no mixing types
     const timeFilters: TimeOptions = {
-        before: undefined,
-        after: undefined,
+        // before: 41400000,
+        // after: undefined,
+        //-------
+        // before: "10:30 AM",
+        // after: "9:30 PM",
     };
 
-    console.time("Running generation");
+    //Fine tune options for filtering and generation
+    const customOptions: ExtraOptions = {
+        // filterAction: "NEGATIVE",
+        // globallyAllowHonors: false,
+        // localDisallowHonorsList: {},
+        // lastPointDetails: [],
+        // generateAmount: 1000000000000,
+        // allowIncompleteSections: true,
+    };
 
-    // await generateFilteredSchedules(sectionFilters, unwantedDay, timeFilters, {
-    //     generateAmount: 139,
-    //     allowIncompleteSections: undefined,
-    // });
+    console.time("Time for data fetch and schedule generation");
 
-    // await collectSectionsData(["CS114", "ENGL101"], "winter_2023-2024");
+    const relevantCoursesData = await collectSectionsData(
+        courseTitleToFetch,
+        "Spring_2024",
+    );
 
-    console.timeEnd("Running generation");
+    await generateFilteredSchedules(
+        relevantCoursesData,
+        sectionFilters,
+        unwantedDay,
+        timeFilters,
+        customOptions,
+    );
+
+    console.timeEnd("Time for data fetch and schedule generation");
 };
 
 main();

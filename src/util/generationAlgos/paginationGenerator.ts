@@ -54,7 +54,13 @@ export type GenerationOptions = {
     allowIncompleteSections?: boolean;
 };
 
-const DEFAULT_GENERATION_AMOUNT = 25;
+export const DEFAULT_GENERATION_AMOUNT = 25;
+
+const DEFAULT_GENERATION_OPTIONS: GenerationOptions = {
+    lastPointDetails: [],
+    generateAmount: DEFAULT_GENERATION_AMOUNT,
+    allowIncompleteSections: false,
+};
 
 /**
  *
@@ -67,12 +73,14 @@ export function paginationGenerator(
     courseSectionsMap: CompiledCoursesData,
     generationOptions: GenerationOptions = {},
 ): [ReportSchedules, LastPointDetails] {
-    const { lastPointDetails, generateAmount, allowIncompleteSections } =
-        generationOptions;
-
-    if (lastPointDetails === null) {
-        return [[], null];
-    }
+    const {
+        lastPointDetails,
+        generateAmount,
+        allowIncompleteSections,
+    }: GenerationOptions = {
+        ...DEFAULT_GENERATION_OPTIONS,
+        ...generationOptions,
+    };
 
     if (
         typeof generateAmount !== "undefined" &&
@@ -93,20 +101,32 @@ export function paginationGenerator(
         );
     }
 
+    if (lastPointDetails === null) {
+        return [[], null];
+    }
+
     if (
         typeof lastPointDetails !== "undefined" &&
-        areDuplicatesInLPD(lastPointDetails)
+        (!Array.isArray(lastPointDetails) ||
+            areDuplicatesInLPD(lastPointDetails))
     ) {
         throw new Error(
-            `Last Point Details has a duplicate course: ${lastPointDetails}`,
+            `Last Point Details must be an array without duplicate course but given: ${lastPointDetails}`,
         );
     }
 
+    //If undefined, give LPD default value
     const LPD = typeof lastPointDetails === "undefined" ? [] : lastPointDetails;
 
+    //If undefined, give generateNum default value
     const generateNum = generateAmount
         ? generateAmount
         : DEFAULT_GENERATION_AMOUNT;
+
+    //If undefined, give allowIncompleteSchedules default value
+    const allowIncompleteSchedules = allowIncompleteSections
+        ? allowIncompleteSections
+        : DEFAULT_GENERATION_OPTIONS.allowIncompleteSections;
 
     const generatedSchedules: ReportSchedules = [];
     const currentSchedule: Schedule = {
@@ -130,7 +150,7 @@ export function paginationGenerator(
         LPD,
         generateNum,
         generatedSchedules,
-        allowIncompleteSections ? allowIncompleteSections : false,
+        allowIncompleteSchedules,
     );
 
     return [generatedSchedules, newLDP];

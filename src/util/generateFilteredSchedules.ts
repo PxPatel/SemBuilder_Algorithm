@@ -1,11 +1,16 @@
 import { readFileSync, writeFileSync } from "fs";
 import {
+    SecNumOptions,
     SelectedSections,
     filterSectionsByNumber,
 } from "./sectionFilters/filterSectionsByNumber";
 import { CompiledCoursesData, Day } from "../types/api.types";
 import { filterSectionByDays } from "./sectionFilters/filterSectionsByDays";
-import { paginationGenerator } from "./generationAlgos/paginationGenerator";
+import {
+    DEFAULT_GENERATION_AMOUNT,
+    GenerationOptions,
+    paginationGenerator,
+} from "./generationAlgos/paginationGenerator";
 import {
     TimeOptions,
     filterSectionByTime,
@@ -16,31 +21,66 @@ export type ExtraOptions = {
     lastPointDetails?: LastPointDetails;
     generateAmount?: number;
     allowIncompleteSections?: boolean;
+    filterAction?: "POSITIVE" | "NEGATIVE";
+    globallyAllowHonors?: boolean;
+    localDisallowHonorsList?: {
+        [courseTitle: string]: boolean;
+    };
+};
+
+const DEFAULT_EXTRA_OPTIONS: ExtraOptions = {
+    lastPointDetails: [],
+    generateAmount: DEFAULT_GENERATION_AMOUNT,
+    allowIncompleteSections: false,
+    filterAction: "POSITIVE",
+    globallyAllowHonors: true,
+    localDisallowHonorsList: {},
 };
 
 export async function generateFilteredSchedules(
+    relevantCoursesData: CompiledCoursesData,
     sectionFilters: SelectedSections,
     unwantedDays: Day[],
     timeFilters: TimeOptions,
     customOptions: ExtraOptions = {},
 ): Promise<void> {
-    const READ_FROM_PATH =
-        "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data.json";
+    const { READ_FROM_PATH, WRITE_TO_PATH } = {
+        READ_FROM_PATH:
+            "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data.json",
+        WRITE_TO_PATH:
+            "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data2.json",
+    };
 
-    const WRITE_TO_PATH =
-        "C:\\Users\\laugh\\Downloads\\SemBuilder_Algo\\src\\logs\\data2.json";
+    const {
+        lastPointDetails,
+        generateAmount,
+        allowIncompleteSections,
+        filterAction,
+        globallyAllowHonors,
+        localDisallowHonorsList,
+    } = {
+        ...DEFAULT_EXTRA_OPTIONS,
+        ...customOptions,
+    };
 
-    const { lastPointDetails, generateAmount, allowIncompleteSections } =
-        customOptions;
+    // console.log(
+    //     lastPointDetails,
+    //     generateAmount,
+    //     allowIncompleteSections,
+    //     filterAction,
+    //     globallyAllowHonors,
+    //     localDisallowHonorsList,
+    // );
 
     try {
-        // const relevantCourseData = await collectSectionsData(inputObject);
         const relevantCoursesData = (await JSON.parse(
             readFileSync(READ_FROM_PATH, "utf-8"),
         )) as CompiledCoursesData;
 
         filterSectionsByNumber(relevantCoursesData, sectionFilters, {
-            action: "POSITIVE",
+            filterAction,
+            globallyAllowHonors,
+            localDisallowHonorsList,
         });
         filterSectionByDays(relevantCoursesData, unwantedDays);
         filterSectionByTime(relevantCoursesData, timeFilters);
@@ -51,7 +91,7 @@ export async function generateFilteredSchedules(
             allowIncompleteSections: allowIncompleteSections,
         });
 
-        writeFileSync(WRITE_TO_PATH, JSON.stringify(response));
+        // writeFileSync(WRITE_TO_PATH, JSON.stringify(response));
 
         console.log("Number of schedules generated:", response[0].length);
     } catch (error) {

@@ -49,7 +49,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
             sectionFilters,
-            { action: "POSITIVE" },
+            { filterAction: "POSITIVE" },
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
@@ -199,7 +199,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
             sectionFilters,
-            { action: "NEGATIVE" },
+            { filterAction: "NEGATIVE" },
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
@@ -230,7 +230,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
             sectionFilters,
-            { action: "NEGATIVE" },
+            { filterAction: "NEGATIVE" },
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
@@ -261,7 +261,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
             sectionFilters,
-            { action: "NEGATIVE" },
+            { filterAction: "NEGATIVE" },
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
@@ -293,7 +293,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
             sectionFilters,
-            { action: "NEGATIVE" },
+            { filterAction: "NEGATIVE" },
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
@@ -327,7 +327,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const filteredResponse = filterSectionsByNumber(
             fakeMap,
             sectionFilters,
-            { action: "NEGATIVE" },
+            { filterAction: "NEGATIVE" },
         );
         expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
@@ -356,7 +356,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             globallyAllowHonors: false,
         };
 
@@ -398,7 +398,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             globallyAllowHonors: false,
         };
 
@@ -440,7 +440,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             globallyAllowHonors: false,
         };
 
@@ -482,7 +482,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             globallyAllowHonors: false,
         };
 
@@ -525,7 +525,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             globallyAllowHonors: false,
         };
 
@@ -569,7 +569,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
             ENGL102: ["089"],
         };
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             globallyAllowHonors: false,
         };
 
@@ -616,7 +616,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "POSITIVE",
+            filterAction: "POSITIVE",
             globallyAllowHonors: false,
         };
 
@@ -657,7 +657,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "POSITIVE",
+            filterAction: "POSITIVE",
             globallyAllowHonors: false,
         };
 
@@ -698,7 +698,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "POSITIVE",
+            filterAction: "POSITIVE",
             globallyAllowHonors: false,
         };
 
@@ -739,7 +739,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "POSITIVE",
+            filterAction: "POSITIVE",
             globallyAllowHonors: false,
         };
 
@@ -781,7 +781,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "POSITIVE",
+            filterAction: "POSITIVE",
             globallyAllowHonors: false,
         };
 
@@ -824,7 +824,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
             ENGL102: ["089"],
         };
         const specialOptions: SecNumOptions = {
-            action: "POSITIVE",
+            filterAction: "POSITIVE",
             globallyAllowHonors: false,
         };
 
@@ -893,10 +893,10 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         const sectionFilters: SelectedSections = {
             CS114: ["004", "002"],
         };
-        const action: "POSITIVE" | "NEGATIVE" = null;
+        const filterAction: "POSITIVE" | "NEGATIVE" = null;
 
         expect(() =>
-            filterSectionsByNumber(fakeMap, sectionFilters, { action }),
+            filterSectionsByNumber(fakeMap, sectionFilters, { filterAction }),
         ).toThrow(/action/i);
     });
 
@@ -916,7 +916,7 @@ describe.only("Filtering a course-sections map by specific sections ", () => {
         };
 
         const specialOptions: SecNumOptions = {
-            action: "NEGATIVE",
+            filterAction: "NEGATIVE",
             localDisallowHonorsList,
         };
 

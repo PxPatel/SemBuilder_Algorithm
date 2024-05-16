@@ -40,7 +40,7 @@ export interface SelectedSections {
 }
 
 export type SecNumOptions = {
-    action?: "POSITIVE" | "NEGATIVE";
+    filterAction?: "POSITIVE" | "NEGATIVE";
     globallyAllowHonors?: boolean;
     localDisallowHonorsList?: {
         [courseTitle: string]: boolean;
@@ -48,7 +48,7 @@ export type SecNumOptions = {
 };
 
 const DEFAULT_SEC_NUM_OPTIONS: SecNumOptions = {
-    action: "POSITIVE",
+    filterAction: "POSITIVE",
     globallyAllowHonors: true,
     localDisallowHonorsList: {},
 };
@@ -58,17 +58,17 @@ export function filterSectionsByNumber(
     sectionFilters: SelectedSections,
     specialOptions: SecNumOptions = {},
 ): CompiledCoursesData {
-    const { action, globallyAllowHonors, localDisallowHonorsList } = {
+    const { filterAction, globallyAllowHonors, localDisallowHonorsList } = {
         ...DEFAULT_SEC_NUM_OPTIONS,
         ...specialOptions,
     };
 
     if (
-        typeof action !== "undefined" &&
-        (action === null || typeof action !== "string")
+        typeof filterAction !== "undefined" &&
+        (filterAction === null || typeof filterAction !== "string")
     ) {
         throw new Error(
-            `'action' can only have values "POSITIVE" or "NEGATIVE", if parameter is inputted`,
+            `'filterAction' can only have values "POSITIVE" or "NEGATIVE", if parameter is inputted`,
         );
     }
 
@@ -95,6 +95,20 @@ export function filterSectionsByNumber(
         );
     }
 
+    //SET DEFAULT VALUES for undefined
+    const actionType =
+        typeof filterAction !== "undefined" ? filterAction : "POSITIVE";
+
+    const allowHonorsOnFull =
+        typeof globallyAllowHonors !== "undefined" ? globallyAllowHonors : true;
+
+    const localBanHonorsList =
+        typeof localDisallowHonorsList !== "undefined"
+            ? localDisallowHonorsList
+            : {};
+
+    // console.log(actionType, allowHonorsOnFull, localBanHonorsList);
+
     isArraySubsetOfOther(
         Object.keys(sectionFilters),
         Object.keys(courseSectionsMap),
@@ -119,21 +133,23 @@ export function filterSectionsByNumber(
     }
 
     const cloneCourseSectionsMap =
-        action === "POSITIVE" ? deepCloneObject(courseSectionsMap) : undefined;
+        actionType === "POSITIVE"
+            ? deepCloneObject(courseSectionsMap)
+            : undefined;
 
     const areFiltersEmpty = Object.keys(sectionFilters).every(
         courseTitle => sectionFilters[courseTitle].length === 0,
     );
 
     //If globallyHonors false removed then all get removed, no exception
-    if (!globallyAllowHonors) {
+    if (!allowHonorsOnFull) {
         filterSectionIfHonors(courseSectionsMap);
     }
     //Locally remove honors on particular courses
-    else if (Object.keys(localDisallowHonorsList).length !== 0) {
-        const coursesToFilterOutHonors = Object.keys(
-            localDisallowHonorsList,
-        ).filter(courseTitle => localDisallowHonorsList[courseTitle]);
+    else if (Object.keys(localBanHonorsList).length !== 0) {
+        const coursesToFilterOutHonors = Object.keys(localBanHonorsList).filter(
+            courseTitle => localBanHonorsList[courseTitle],
+        );
 
         if (coursesToFilterOutHonors.length !== 0)
             filterSectionIfHonors(courseSectionsMap, coursesToFilterOutHonors);
@@ -147,7 +163,7 @@ export function filterSectionsByNumber(
         const sectionsToFilter = sectionFilters[courseTitle];
         if (sectionsToFilter.length === 0) continue;
 
-        if (action === "POSITIVE") {
+        if (actionType === "POSITIVE") {
             //Clear the secitons and initialize the courseTitle key
             //in the CSM dictionary for the course.
             const newSectionsData: Record<string, SectionData> = {};
@@ -161,7 +177,7 @@ export function filterSectionsByNumber(
             courseSectionsMap[courseTitle] = newSectionsData;
         }
 
-        if (action === "NEGATIVE") {
+        if (actionType === "NEGATIVE") {
             for (const sectionToPrune of sectionsToFilter) {
                 //sectionToPrune if Honors do not exist. So verify
                 if (courseSectionsMap[courseTitle][sectionToPrune]) {
