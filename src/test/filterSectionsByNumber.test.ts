@@ -26,930 +26,939 @@ async function getCoursesData(): Promise<CompiledCoursesData> {
 
 const courseSectionMap = getCoursesData();
 
-describe.only("Filtering a course-sections map by specific sections ", () => {
-    test("No filters applied", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {};
+describe("Filtering a course-sections map by specific sections ", () => {
+    describe("Edge cases and Errors", () => {
+        test("No filters applied", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {};
 
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-        );
-        expect(filteredResponse).toEqual(realMap);
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+            );
+            expect(filteredResponse).toEqual(realMap);
+        });
+
+        test("Invalid course filter", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS280: ["004", "002"],
+                FIN315: ["002", "102"],
+                MATH337: ["002", "H02"],
+                ENGL102: ["089"],
+            };
+
+            expect(() =>
+                filterSectionsByNumber(fakeMap, sectionFilters),
+            ).toThrow(/course/i);
+        });
+
+        test("Invalid section filter", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["FOO", "002"],
+                FIN315: ["002", "102"],
+                MATH337: ["002", "BAR"],
+                ENGL102: ["089"],
+            };
+
+            expect(() =>
+                filterSectionsByNumber(fakeMap, sectionFilters),
+            ).toThrow(/section/i);
+        });
+
+        test("Invalid action parameter", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+            };
+            const filterAction: "POSITIVE" | "NEGATIVE" = null;
+
+            expect(() =>
+                filterSectionsByNumber(fakeMap, sectionFilters, {
+                    filterAction,
+                }),
+            ).toThrow(/action/i);
+        });
     });
 
-    test("One section positive filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004"],
-        };
+    describe("Positive/Global Allow/No Local", () => {
+        test("One section positive filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004"],
+            };
 
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            { filterAction: "POSITIVE" },
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                { filterAction: "POSITIVE" },
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("One section positive filter - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                ENGL102: ["089"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli section positive filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course positive filters - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course positive filters - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002", "102"],
+                MATH337: ["002", "H02"],
+                ENGL102: ["089"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
     });
 
-    test("One section positive filter - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            ENGL102: ["089"],
-        };
+    describe("Negative/Global Allow/No Local", () => {
+        test("One section negative filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004"],
+            };
 
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                { filterAction: "NEGATIVE" },
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("One section negative filter - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                ENGL102: ["089"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                { filterAction: "NEGATIVE" },
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli section negative filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                { filterAction: "NEGATIVE" },
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course negative filters - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                { filterAction: "NEGATIVE" },
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course negative filters - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002", "102"],
+                MATH337: ["002", "H02"],
+                ENGL102: ["089"],
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                { filterAction: "NEGATIVE" },
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                ),
+            ).toBeTruthy();
+        });
     });
 
-    test("Mutli section positive filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-        };
+    describe("Positive/Global Disallow/No Local", () => {
+        test("One positive and non-H filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004"],
+            };
 
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+            const specialOptions: SecNumOptions = {
+                filterAction: "POSITIVE",
+                globallyAllowHonors: false,
+            };
 
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("One positive and non-H filter - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                ENGL102: ["089"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "POSITIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("One positive and non-H filter - 3", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["H02", "H04"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "POSITIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli section positive and non-H filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "POSITIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course positive and non-H filters - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "POSITIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course positive and non-H filters - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002", "102"],
+                MATH337: ["002", "H02"],
+                ENGL102: ["089"],
+            };
+            const specialOptions: SecNumOptions = {
+                filterAction: "POSITIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetPositivelyPrunedCorrectly(
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
     });
 
-    test("Mutli course positive filters - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002"],
-        };
+    describe("Negative/Global Disallow/No Local", () => {
+        test("One negative and non-H filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004"],
+            };
 
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                globallyAllowHonors: false,
+            };
 
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
 
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("One negative and non-H filter - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                ENGL102: ["089"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("One negative and non-H filter - 3", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["H02", "H04"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli section negative and non-H filter - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course negative and non-H filters - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002"],
+            };
+
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
+
+        test("Mutli course negative and non-H filters - 2", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002", "102"],
+                MATH337: ["002", "H02"],
+                ENGL102: ["089"],
+            };
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                globallyAllowHonors: false,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
+                sectionFilters,
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: false,
+                    },
+                ),
+            ).toBeTruthy();
+        });
     });
 
-    test("Mutli course positive filters - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002", "102"],
-            MATH337: ["002", "H02"],
-            ENGL102: ["089"],
-        };
+    describe("Negative/Global Allow/Local Applied", () => {
+        test("Mutli course negative and non-H Local filters - 1", async () => {
+            const realMap = await courseSectionMap;
+            const fakeMap = deepCloneObject(realMap);
+            const sectionFilters: SelectedSections = {
+                CS114: ["004", "002"],
+                FIN315: ["002"],
+            };
 
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+            const localDisallowHonorsList = {
+                CS114: true,
+                MATH337: true,
+                FIN315: false,
+                ENGL102: true,
+            };
 
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
+            const specialOptions: SecNumOptions = {
+                filterAction: "NEGATIVE",
+                localDisallowHonorsList,
+            };
+
+            const filteredResponse = filterSectionsByNumber(
+                fakeMap,
                 sectionFilters,
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One section negative filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004"],
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            { filterAction: "NEGATIVE" },
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One section negative filter - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            ENGL102: ["089"],
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            { filterAction: "NEGATIVE" },
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli section negative filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            { filterAction: "NEGATIVE" },
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli course negative filters - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002"],
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            { filterAction: "NEGATIVE" },
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli course negative filters - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002", "102"],
-            MATH337: ["002", "H02"],
-            ENGL102: ["089"],
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            { filterAction: "NEGATIVE" },
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One negative and non-H filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One negative and non-H filter - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            ENGL102: ["089"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One negative and non-H filter - 3", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["H02", "H04"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli section negative and non-H filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli course negative and non-H filters - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli course negative and non-H filters - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002", "102"],
-            MATH337: ["002", "H02"],
-            ENGL102: ["089"],
-        };
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    /**
-     *
-     *
-     *
-     */
-    test("One positive and non-H filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "POSITIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One positive and non-H filter - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            ENGL102: ["089"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "POSITIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("One positive and non-H filter - 3", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["H02", "H04"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "POSITIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli section positive and non-H filter - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "POSITIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli course positive and non-H filters - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002"],
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "POSITIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Mutli course positive and non-H filters - 2", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002", "102"],
-            MATH337: ["002", "H02"],
-            ENGL102: ["089"],
-        };
-        const specialOptions: SecNumOptions = {
-            filterAction: "POSITIVE",
-            globallyAllowHonors: false,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetPositivelyPrunedCorrectly(
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: false,
-                },
-            ),
-        ).toBeTruthy();
-    });
-
-    test("Invalid course filter", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS280: ["004", "002"],
-            FIN315: ["002", "102"],
-            MATH337: ["002", "H02"],
-            ENGL102: ["089"],
-        };
-
-        expect(() => filterSectionsByNumber(fakeMap, sectionFilters)).toThrow(
-            /course/i,
-        );
-    });
-
-    test("Invalid section filter", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["FOO", "002"],
-            FIN315: ["002", "102"],
-            MATH337: ["002", "BAR"],
-            ENGL102: ["089"],
-        };
-
-        expect(() => filterSectionsByNumber(fakeMap, sectionFilters)).toThrow(
-            /section/i,
-        );
-    });
-
-    test("Invalid action parameter", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-        };
-        const filterAction: "POSITIVE" | "NEGATIVE" = null;
-
-        expect(() =>
-            filterSectionsByNumber(fakeMap, sectionFilters, { filterAction }),
-        ).toThrow(/action/i);
-    });
-
-    test("Mutli course negative and non-H Local filters - 1", async () => {
-        const realMap = await courseSectionMap;
-        const fakeMap = deepCloneObject(realMap);
-        const sectionFilters: SelectedSections = {
-            CS114: ["004", "002"],
-            FIN315: ["002"],
-        };
-
-        const localDisallowHonorsList = {
-            CS114: true,
-            MATH337: true,
-            FIN315: false,
-            ENGL102: true,
-        };
-
-        const specialOptions: SecNumOptions = {
-            filterAction: "NEGATIVE",
-            localDisallowHonorsList,
-        };
-
-        const filteredResponse = filterSectionsByNumber(
-            fakeMap,
-            sectionFilters,
-            specialOptions,
-        );
-        expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
-
-        expect(
-            didMapGetNegativelyPrunedCorrectly(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: true,
-                    localDisallowHonorsList,
-                },
-            ),
-        ).toBeTruthy();
-
-        expect(
-            areUnfilteredPropertiesUnaltered(
-                realMap,
-                filteredResponse,
-                sectionFilters,
-                {
-                    globallyAllowHonors: true,
-                    localDisallowHonorsList,
-                },
-            ),
-        ).toBeTruthy();
+                specialOptions,
+            );
+            expect(Object.keys(filteredResponse)).toEqual(Object.keys(realMap));
+
+            expect(
+                didMapGetNegativelyPrunedCorrectly(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: true,
+                        localDisallowHonorsList,
+                    },
+                ),
+            ).toBeTruthy();
+
+            expect(
+                areUnfilteredPropertiesUnaltered(
+                    realMap,
+                    filteredResponse,
+                    sectionFilters,
+                    {
+                        globallyAllowHonors: true,
+                        localDisallowHonorsList,
+                    },
+                ),
+            ).toBeTruthy();
+        });
     });
 });
 

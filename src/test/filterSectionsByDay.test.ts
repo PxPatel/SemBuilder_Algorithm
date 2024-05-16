@@ -19,7 +19,7 @@ async function getCoursesData(): Promise<CompiledCoursesData> {
 
 const courseSectionMap = getCoursesData();
 
-describe.skip("Filtering a course-section map based on unwanted days", () => {
+describe("Filtering a course-section map based on unwanted days", () => {
     test("No filters applied", async () => {
         const realMap = await courseSectionMap;
         const fakeMap = deepCloneObject(realMap);

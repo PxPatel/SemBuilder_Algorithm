@@ -22,7 +22,7 @@
         "validate-prettiness": "yarn run-prettier -c",
         "make-prettier": "yarn run-prettier --write"
     },
-    "author": "",
+    "author": "Priyansh Patel",
     "license": "ISC",
     "dependencies": {
     },
